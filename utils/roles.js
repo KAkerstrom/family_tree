@@ -4,4 +4,5 @@ module.exports = {
   add: 2,
   edit: 3,
   delete: 4,
+  admin: 5,
 };

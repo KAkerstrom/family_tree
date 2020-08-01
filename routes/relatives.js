@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
+const mongoose = require('mongoose');
 const auth = require('../middleware/auth');
 const tree_auth = require('../middleware/tree_auth');
 const { check, validationResult } = require('express-validator');
-const querystring = require('querystring');
-const Tree = require('../models/Tree');
 const Relative = require('../models/Relative');
+const Relationship = require('../models/Relationship');
 const roles = require('../utils/roles');
 
 // @route   GET api/trees/:treeId/relatives
@@ -119,15 +119,13 @@ router.put('/:relativeId', [auth, tree_auth], async (req, res) => {
     'birthdate',
     'deathdate',
     'attributes',
-    'children',
-    'parents',
+    'notes',
   ];
   const populatedFields = {};
-  for (field in fields)
+  for (const field of fields)
     if (req.body[field]) populatedFields[field] = req.body[field];
-
   try {
-    let relative = await Relative.findOne({
+    let relative = await Relative.exists({
       _id: req.params.relativeId,
       tree: req.params.treeId,
     });
@@ -141,7 +139,7 @@ router.put('/:relativeId', [auth, tree_auth], async (req, res) => {
       },
       { new: true }
     );
-    res.json(relative);
+    res.json({ data: relative });
   } catch (err) {
     console.log(err.message);
     res.status(500).send({ errors: ['Server Error.'] });
@@ -336,133 +334,46 @@ router.get('/:relativeId/parents', [auth, tree_auth], async (req, res) => {
   }
 });
 
-// @route   GET api/trees/:treeId/relatives/:relativeId/spouses
-// @desc    Get a relative's spouses
+// @route   GET api/trees/:treeId/relatives/:relativeId/relationships
+// @desc    Get a relative's relationships
 // @access  Private
-router.get('/:relativeId/spouses', [auth, tree_auth], async (req, res) => {
-  try {
-    if (res.role < roles.read)
-      return res
-        .status(500)
-        .json({ errors: ['Tree not found, or permission denied.'] });
-    let relative = await Relative.findOne(
-      {
-        _id: req.params.relativeId,
-        tree: req.params.treeId,
-      },
-      'spouses'
-    ).populate('spouses.spouse');
-    if (!relative)
-      return res.status(404).json({ errors: ['Relative not found.'] });
-    res.json({ data: relative.spouses });
-  } catch (err) {
-    console.log(err.message);
-    res.status(500).send({ errors: ['Server Error.'] });
-  }
-});
-
-// @route   POST api/trees/:treeId/relatives/:relativeId/spouses
-// @desc    Add new spouse to relative
-// @access  Private
-router.post(
-  '/:relativeId/spouses/:spouseId',
-  [[auth, tree_auth]],
+router.get(
+  '/:relativeId/relationships',
+  [auth, tree_auth],
   async (req, res) => {
-    if (res.role < roles.add)
-      return res
-        .status(500)
-        .json({ errors: ['Tree not found, or permission denied.'] });
-
     try {
-      if (
-        req.body.start_date &&
-        req.body.end_date &&
-        req.body.start_date > req.body.end_date
-      )
+      if (res.role < roles.read)
         return res
           .status(500)
-          .json({ errors: ['Start date cannot be after end date.'] });
+          .json({ errors: ['Tree not found, or permission denied.'] });
       let relative = await Relative.findOne(
         {
           _id: req.params.relativeId,
           tree: req.params.treeId,
         },
-        'spouses'
-      );
+        'relationships'
+      ).populate('relationships.spouse');
       if (!relative)
         return res.status(404).json({ errors: ['Relative not found.'] });
-      if (
-        relative.spouses.filter(
-          (x) => x.spouse.toString() === req.params.spouseId
-        ).length > 0 &&
-        (!req.body.start_date || !req.body.end_date)
-      )
-        res.status(500).json({
-          errors: [
-            'If adding multiple relationships between 2 people, you must specify all start and end dates.',
-          ],
-        });
-      for (const relationship in relative.spouses) {
-        if (
-          relationship.spouse.toString() === req.params.spouseId &&
-          (!relationship.start_date || !relationship.end_date)
-        )
-          res.status(500).json({
-            errors: [
-              'If adding multiple relationships between 2 people, you must specify all start and end dates.',
-            ],
-          });
-        if (
-          !(
-            req.body.end_date < relationship.start_date ||
-            req.body.start_date > relationship.end_date
-          )
-        )
-          res.status(500).json({
-            errors: ['Relationship dates cannot overlap.'],
-          });
-      }
-
-      let spouse = await Relative.findOne(
-        {
-          _id: req.params.childId,
+      return res.json(relative);
+      // Todo: UNFINISHED
+      const relationships = relative.relationships.map(async (relationship) => {
+        const spouseId = await relationship.spouses.find(
+          (x) => x.toString() !== req.params.relativeId
+        );
+        const spouse = Relative.findOne({
+          _id: spouseId,
           tree: req.params.treeId,
-        },
-        'spouses'
-      );
-      if (!spouse)
-        return res.status(404).json({ errors: ['Spouse not found.'] });
-      // Shouldn't need to check for start/end dates on spouse
-      for (const relationship in spouse.spouses)
-        if (
-          !(
-            req.body.end_date < relationship.start_date ||
-            req.body.start_date > relationship.end_date
-          )
-        )
-          res.status(500).json({
-            errors: ["Spouse's relationship dates cannot overlap."],
-          });
-
-      await Relative.findByIdAndUpdate(req.params.spouseId, {
-        $addToSet: {
-          spouses: {
-            spouse: req.params.relativeId,
-            start_date: req.body.start_date,
-            end_date: req.body.end_date,
-          },
-        },
+        });
+        const { _id, start_date, end_date } = relationship;
+        return {
+          _id,
+          spouse,
+          start_date: start_date || null,
+          end_date: end_date || null,
+        };
       });
-      await Relative.findByIdAndUpdate(req.params.relativeId, {
-        $addToSet: {
-          spouses: {
-            spouse: req.params.spouseId,
-            start_date: req.body.start_date,
-            end_date: req.body.end_date,
-          },
-        },
-      });
-      res.json({ msg: 'Spouse added.' });
+      res.json({ data: relative.relationships });
     } catch (err) {
       console.log(err.message);
       res.status(500).send({ errors: ['Server Error.'] });
@@ -470,11 +381,81 @@ router.post(
   }
 );
 
-// @route   PUT api/trees/:treeId/relatives/:relativeId/spouses
-// @desc    Add new spouse to relative
+// @route   POST api/trees/:treeId/relatives/:relativeId/relationships
+// @desc    Add new relationship to relative
 // @access  Private
 router.post(
-  '/:relativeId/spouses/:spouseId',
+  '/:relativeId/relationships',
+  [[auth, tree_auth]],
+  [check('spouseId', 'Spouse Id is required').not().isEmpty()],
+  async (req, res) => {
+    if (res.role < roles.add)
+      return res
+        .status(500)
+        .json({ errors: ['Tree not found, or permission denied.'] });
+
+    try {
+      if (req.params.relativeId === req.body.spouseId)
+        return res.status(500).json({
+          errors: ['Relative cannot be in a relationship with themself.'],
+        });
+      if (
+        req.body.start_date &&
+        req.body.end_date &&
+        Date(req.body.start_date) > Date(req.body.end_date)
+      )
+        return res
+          .status(500)
+          .json({ errors: ['Start date cannot be after end date.'] });
+
+      let relative = await Relative.exists({
+        _id: req.params.relativeId,
+        tree: req.params.treeId,
+      });
+      if (!relative)
+        return res.status(404).json({ errors: ['Relative not found.'] });
+
+      let spouse = await Relative.exists({
+        _id: req.body.spouseId,
+        tree: req.params.treeId,
+      });
+      if (!spouse)
+        return res.status(404).json({ errors: ['Spouse not found.'] });
+
+      const relationshipId = mongoose.Types.ObjectId();
+      await Relative.findByIdAndUpdate(req.params.relativeId, {
+        $addToSet: {
+          relationships: {
+            _id: relationshipId,
+            spouse: req.body.spouseId,
+            start_date: req.body.start_date || null,
+            end_date: req.body.end_date || null,
+          },
+        },
+      });
+      await Relative.findByIdAndUpdate(req.body.spouseId, {
+        $addToSet: {
+          relationships: {
+            _id: relationshipId,
+            spouse: req.params.relativeId,
+            start_date: req.body.start_date || null,
+            end_date: req.body.end_date || null,
+          },
+        },
+      });
+      res.json({ data: relationshipId });
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).send({ errors: ['Server Error.'] });
+    }
+  }
+);
+
+// @route   PUT api/trees/:treeId/relatives/:relativeId/relationships/:relationshipId
+// @desc    Add new spouse to relative
+// @access  Private
+router.put(
+  '/:relativeId/relationships/:relationshipId',
   [[auth, tree_auth]],
   async (req, res) => {
     if (res.role < roles.add)
@@ -483,95 +464,54 @@ router.post(
         .json({ errors: ['Tree not found, or permission denied.'] });
 
     try {
-      if (
-        req.body.start_date &&
-        req.body.end_date &&
-        req.body.start_date > req.body.end_date
-      )
-        return res
-          .status(500)
-          .json({ errors: ['Start date cannot be after end date.'] });
+      // Todo: only get only the relevant relationship value
       let relative = await Relative.findOne(
         {
           _id: req.params.relativeId,
           tree: req.params.treeId,
         },
-        'spouses'
+        'relationships'
       );
       if (!relative)
         return res.status(404).json({ errors: ['Relative not found.'] });
-      if (
-        relative.spouses.filter(
-          (x) => x.spouse.toString() === req.params.spouseId
-        ).length > 0 &&
-        (!req.body.start_date || !req.body.end_date)
-      )
-        res.status(500).json({
-          errors: [
-            'If adding multiple relationships between 2 people, you must specify all start and end dates.',
-          ],
-        });
-      for (const relationship in relative.spouses) {
-        if (
-          relationship.spouse.toString() === req.params.spouseId &&
-          (!relationship.start_date || !relationship.end_date)
-        )
-          res.status(500).json({
-            errors: [
-              'If adding multiple relationships between 2 people, you must specify all start and end dates.',
-            ],
-          });
-        if (
-          !(
-            req.body.end_date < relationship.start_date ||
-            req.body.start_date > relationship.end_date
-          )
-        )
-          res.status(500).json({
-            errors: ['Relationship dates cannot overlap.'],
-          });
-      }
+      const relationship = relative.relationships.find(
+        (x) => x._id.toString() === req.params.relationshipId
+      );
+      if (!relationship)
+        return res.status(404).json({ errors: ['Relationship not found.'] });
+      if (req.body.start_date) relationship.start_date = req.body.start_date;
+      if (req.body.end_date) relationship.end_date = req.body.end_date;
+      if (Date(relationship.end_date) < Date(relationship.start_date))
+        return res
+          .status(500)
+          .json({ errors: ['Start date cannot be after end date.'] });
 
       let spouse = await Relative.findOne(
         {
-          _id: req.params.childId,
+          _id: relationship.spouse,
           tree: req.params.treeId,
         },
-        'spouses'
+        'relationships'
       );
       if (!spouse)
         return res.status(404).json({ errors: ['Spouse not found.'] });
-      // Shouldn't need to check for start/end dates on spouse
-      for (const relationship in spouse.spouses)
-        if (
-          !(
-            req.body.end_date < relationship.start_date ||
-            req.body.start_date > relationship.end_date
-          )
-        )
-          res.status(500).json({
-            errors: ["Spouse's relationship dates cannot overlap."],
-          });
-
-      await Relative.findByIdAndUpdate(req.params.spouseId, {
-        $addToSet: {
-          spouses: {
-            spouse: req.params.relativeId,
-            start_date: req.body.start_date,
-            end_date: req.body.end_date,
-          },
-        },
-      });
       await Relative.findByIdAndUpdate(req.params.relativeId, {
-        $addToSet: {
-          spouses: {
-            spouse: req.params.spouseId,
-            start_date: req.body.start_date,
-            end_date: req.body.end_date,
-          },
-        },
+        relationships: [
+          ...relative.relationships.filter(
+            (x) => x._id.toString() !== req.params.relationshipId
+          ),
+          relationship,
+        ],
       });
-      res.json({ msg: 'Spouse added.' });
+      await Relative.findByIdAndUpdate(req.params.spouseId, {
+        relationships: [
+          ...spouse.relationships.filter(
+            (x) => x._id.toString() !== req.params.relationshipId
+          ),
+          relationship,
+        ],
+      });
+      res.json({ msg: 'Relationship updated.' });
     } catch (err) {
       console.log(err.message);
       res.status(500).send({ errors: ['Server Error.'] });

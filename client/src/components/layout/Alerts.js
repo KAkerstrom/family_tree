@@ -1,8 +1,7 @@
 import React, { useContext } from 'react';
-import AlertContext from '../../context/alert/alertContext';
 
 const Alerts = () => {
-  const { alerts } = useContext(AlertContext);
+  const alerts = [];
   return (
     alerts.length > 0 &&
     alerts.map((alert) => (

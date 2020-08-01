@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Relative = require('./Relative');
 
 const TreeSchema = mongoose.Schema({
-  members: {
+  users: {
     type: Array,
     required: true,
     items: {

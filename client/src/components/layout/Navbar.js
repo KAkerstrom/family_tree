@@ -1,23 +1,15 @@
 import React, { Fragment, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import AuthContext from '../../context/auth/authContext';
-import ContactContext from '../../context/contact/contactContext';
+import { logout } from '../../redux/auth';
+import { connect } from 'react-redux';
 
-function Navbar({ title, icon }) {
-  const { isAuthenticated, logoutUser, user } = useContext(AuthContext);
-  const { clearContacts } = useContext(ContactContext);
-
-  const onLogout = () => {
-    logoutUser();
-    clearContacts();
-  };
-
+function Navbar({ title, icon, authenticated, user, logout }) {
   const authLinks = (
     <Fragment>
       <li>Hello {user && user.name}</li>
       <li>
-        <a onClick={onLogout} href='#!'>
+        <a onClick={() => logout()} href='#!'>
           <i className='fas fa-sign-out-alt' />
           <span className='hide-sm'>Logout</span>
         </a>
@@ -38,12 +30,13 @@ function Navbar({ title, icon }) {
 
   return (
     <div>
-      <div className='navbar bg-primary'>
+      <div className='navbar bg-success'>
         <h1>
           <i className={icon} />
+          {'  '}
           {title}
         </h1>
-        <ul>{isAuthenticated ? authLinks : guestLinks}</ul>
+        <ul>{authenticated ? authLinks : guestLinks}</ul>
       </div>
     </div>
   );
@@ -54,8 +47,17 @@ Navbar.propTypes = {
 };
 
 Navbar.defaultProps = {
-  title: 'Contact Keeper',
-  icon: 'fas fa-id-card-alt',
+  title: 'Family Tree',
+  icon: 'fas fa-tree',
 };
 
-export default Navbar;
+const mapStateToProps = (state) => ({
+  authenticated: state.auth.authenticated,
+  user: state.auth.user,
+});
+
+const mapPropsToDispatch = {
+  logout,
+};
+
+export default connect(mapStateToProps, mapPropsToDispatch)(Navbar);

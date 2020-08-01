@@ -1,22 +1,21 @@
-import React, { useState, useContext, useEffect } from 'react';
-import AlertContext from '../../context/alert/alertContext';
-import AuthContext from '../../context/auth/authContext';
+import React, { useState, useEffect } from 'react';
+import { login, loadUser } from '../../redux/auth';
+import { setAlert } from '../../redux/alerts';
+import { connect } from 'react-redux';
 
-const Login = (props) => {
-  const { setAlert } = useContext(AlertContext);
-  const { loginUser, error, clearErrors, isAuthenticated } = useContext(
-    AuthContext
-  );
-
+const Login = ({
+  history,
+  authenticated,
+  alert,
+  setAlert,
+  login,
+  loadUser,
+}) => {
   useEffect(() => {
-    if (isAuthenticated) props.history.push('/');
-    if (error === 'Invalid credentials') {
-      // should use an errorId instead
-      setAlert(error, 'danger');
-      clearErrors();
-    }
+    if (authenticated) history.push('/trees');
+    else loadUser();
     //eslint-disable-next-line
-  }, [error, isAuthenticated, props.history]);
+  }, [authenticated]);
 
   const [user, setUser] = useState({
     email: '',
@@ -27,10 +26,7 @@ const Login = (props) => {
   const onChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
   const onSubmit = (e) => {
     e.preventDefault();
-    if (email === '' || password === '') {
-      setAlert('Please fill in all fields.', 'danger');
-      clearErrors();
-    } else loginUser({ email, password });
+    login(user.email, user.password);
   };
 
   return (
@@ -67,4 +63,15 @@ const Login = (props) => {
   );
 };
 
-export default Login;
+const mapStateToProps = (state) => ({
+  alert: state.alerts.alert,
+  authenticated: state.auth.authenticated,
+});
+
+const mapStateToDispatch = {
+  login,
+  setAlert,
+  loadUser,
+};
+
+export default connect(mapStateToProps, mapStateToDispatch)(Login);

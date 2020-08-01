@@ -1,26 +1,22 @@
 import React, { useContext, useEffect } from 'react';
-import Contacts from '../contacts/Contacts';
-import ContactForm from '../contacts/ContactForm';
-import ContactFilter from '../../components/contacts/ContactFilter';
-import AuthContext from '../../context/auth/authContext';
+import { loadUser } from '../../redux/auth';
+import { connect } from 'react-redux';
 
-const Home = () => {
-  const { loadUser } = useContext(AuthContext);
+const Home = ({ loadUser }) => {
   useEffect(() => {
     loadUser();
     //eslint-disable-next-line
   }, []);
   return (
     <div className='grid-2'>
-      <div>
-        <ContactForm />
-      </div>
-      <div>
-        <ContactFilter />
-        <Contacts />
-      </div>
+      <div></div>
+      <div></div>
     </div>
   );
 };
 
-export default Home;
+const mapStateToDispatch = {
+  loadUser,
+};
+
+export default connect(null, mapStateToDispatch)(Home);
