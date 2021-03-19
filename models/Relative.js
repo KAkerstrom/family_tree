@@ -38,44 +38,21 @@ const RelativeSchema = mongoose.Schema({
       required: ['name', 'value'],
     },
   },
-  children: {
-    type: Array,
-    default: [],
-    items: {
-      type: mongoose.SchemaTypes.ObjectId,
-      ref: 'relatives',
-    },
-  },
-  parents: {
-    type: Array,
-    default: [],
-    items: {
-      type: mongoose.SchemaTypes.ObjectId,
-      ref: 'relatives',
-    },
-  },
   relationships: {
     type: Array,
     default: [],
     items: {
       type: Object,
       properties: {
-        _id: {
-          type: mongoose.SchemaTypes.ObjectId,
-          required: true,
-        },
-        spouse: {
+        relativeId: {
           type: mongoose.SchemaTypes.ObjectId,
           ref: 'relatives',
           required: true,
         },
-        start_date: {
-          type: Date,
-          required: false,
-        },
-        end_date: {
-          type: Date,
-          required: false,
+        relationshipType: {
+          type: String,
+          required: true,
+          enum: ['child', 'parent', 'spouse'],
         },
       },
     },

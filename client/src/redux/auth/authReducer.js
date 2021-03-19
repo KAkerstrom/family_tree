@@ -6,7 +6,7 @@ const initialState = {
   loading: true,
 };
 
-export default (state = initialState, action) => {
+const reducer = (state = initialState, action) => {
   switch (action.type) {
     case authTypes.LOGIN_SUCCESS:
     case authTypes.REGISTER_SUCCESS:
@@ -20,6 +20,7 @@ export default (state = initialState, action) => {
       return {
         ...state,
         loading: false,
+        authenticated: false,
       };
 
     case authTypes.LOAD_USER_SUCCESS:
@@ -40,3 +41,5 @@ export default (state = initialState, action) => {
       return state;
   }
 };
+
+export default reducer;

@@ -20,14 +20,8 @@ const Relative = ({
     getRelatives(match.params.treeId);
     //eslint-disable-next-line
   }, []);
-  return (
-    <div className='w-100 h-100'>
-      {relatives &&
-        Object.values(relatives).map((relative) => (
-          <RelativeCard relative={relative} />
-        ))}
-    </div>
-  );
+
+  return <div className='w-100 h-100'></div>;
 };
 
 const mapStateToProps = (state) => ({

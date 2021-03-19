@@ -6,7 +6,7 @@ const initialState = {
   loading: true,
 };
 
-export default (state = initialState, action) => {
+const reducer = (state = initialState, action) => {
   switch (action.type) {
     case relativeTypes.LOGIN_SUCCESS:
       return {
@@ -118,3 +118,5 @@ export default (state = initialState, action) => {
       return state;
   }
 };
+
+export default reducer;

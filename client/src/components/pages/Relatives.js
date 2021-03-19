@@ -20,11 +20,12 @@ const Relatives = ({
     getRelatives(match.params.treeId);
     //eslint-disable-next-line
   }, []);
+
   return (
     <div className='w-100 h-100'>
       {relatives &&
         Object.values(relatives).map((relative) => (
-          <RelativeCard relative={relative} />
+          <RelativeCard key={relative._id} relative={relative} />
         ))}
     </div>
   );

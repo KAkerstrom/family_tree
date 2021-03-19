@@ -8,9 +8,11 @@ const Home = ({ loadUser }) => {
     //eslint-disable-next-line
   }, []);
   return (
-    <div className='grid-2'>
-      <div></div>
-      <div></div>
+    <div className='d-flex flex-column align-items-center'>
+      <div className='w-75 shadow p-3 mb-5 bg-white rounded'>
+        <h2 className='text-left'>Welcome</h2>
+        <p></p>
+      </div>
     </div>
   );
 };

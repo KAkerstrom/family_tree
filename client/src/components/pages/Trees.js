@@ -16,7 +16,10 @@ const Trees = ({ user, loadUser, getTrees, trees }) => {
   return (
     <div className='w-100 h-100'>
       <div>
-        {trees && Object.values(trees).map((tree) => <TreeCard tree={tree} />)}
+        {trees &&
+          Object.values(trees).map((tree) => (
+            <TreeCard key={tree._id} tree={tree} />
+          ))}
       </div>
       <div></div>
     </div>

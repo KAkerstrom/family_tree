@@ -1,0 +1,90 @@
+.clickable:hover {
+  cursor: pointer;
+}
+
+.tree-card {
+  border: 1px solid grey;
+  box-shadow: 1px 1px 3px black;
+  #right-arrow {
+    font-size: initial;
+    color: lightgray;
+  }
+  &:hover {
+    box-shadow: 0px 0px 0px;
+    border: 1px solid black;
+  }
+  &:hover #right-arrow {
+    font-size: larger;
+    color: #3caf57;
+  }
+}
+
+.relative-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 150px;
+  height: 200px;
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid grey;
+  box-shadow: 1px 1px 3px black;
+  img {
+    width: 100px;
+    height: 100px;
+    margin: 5px;
+    object-fit: cover;
+    border-radius: 100%;
+    box-shadow: 0px 0px 3px black;
+  }
+  &:hover {
+    box-shadow: 0px 0px 0px;
+    border: 1px solid black;
+  }
+  &:hover #right-arrow {
+    font-size: larger;
+    color: #3caf57;
+  }
+}
+
+.section-heading {
+  border-bottom: 1px solid grey;
+
+  i {
+    min-width: 80px;
+  }
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+  display: block !important;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+
+  .form-row-header {
+    width: 100%;
+    text-align: left;
+    font-size: large;
+    margin: 10px 0 0 10px;
+  }
+
+  .form-field {
+    flex-grow: 1;
+    margin: 10px;
+    min-width: 100px;
+  }
+
+  .form-error {
+    height: 1em;
+  }
+}
+
+.form-error {
+  font-size: small;
+  color: red;
+  height: 1em;
+}

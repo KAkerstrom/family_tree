@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
-const Relative = require('./Relative');
 
 const TreeSchema = mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
   users: {
     type: Array,
     required: true,
@@ -12,7 +15,7 @@ const TreeSchema = mongoose.Schema({
           type: mongoose.SchemaTypes.ObjectId,
           ref: 'users',
         },
-        role: Number, // 0 = No permissions, 1 = read, 2 = add, 3 = edit, 4 = delete
+        role: Number,
       },
     },
   },

@@ -15,6 +15,7 @@ import Trees from './components/pages/Trees';
 import Tree from './components/pages/Tree';
 import Relatives from './components/pages/Relatives';
 import Relative from './components/pages/Relative';
+import NewRelative from './components/pages/NewRelative';
 
 const App = () => {
   return (
@@ -25,13 +26,18 @@ const App = () => {
           <div className='container'>
             <Alerts />
             <Switch>
-              <PrivateRoute exact path='/' component={Home} />
+              <Route exact path='/' component={Home} />
               <PrivateRoute exact path='/trees' component={Trees} />
               <PrivateRoute exact path='/trees/:treeId' component={Tree} />
               <PrivateRoute
                 exact
                 path='/trees/:treeId/relatives'
                 component={Relatives}
+              />
+              <PrivateRoute
+                exact
+                path='/trees/:treeId/relatives/new'
+                component={NewRelative}
               />
               <PrivateRoute
                 exact

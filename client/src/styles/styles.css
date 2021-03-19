@@ -1,0 +1,117 @@
+.clickable:hover {
+  cursor: pointer;
+}
+
+.tree-card {
+  border: 1px solid grey;
+  -webkit-box-shadow: 1px 1px 3px black;
+          box-shadow: 1px 1px 3px black;
+}
+
+.tree-card #right-arrow {
+  font-size: initial;
+  color: lightgray;
+}
+
+.tree-card:hover {
+  -webkit-box-shadow: 0px 0px 0px;
+          box-shadow: 0px 0px 0px;
+  border: 1px solid black;
+}
+
+.tree-card:hover #right-arrow {
+  font-size: larger;
+  color: #3caf57;
+}
+
+.relative-card {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  width: 150px;
+  height: 200px;
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid grey;
+  -webkit-box-shadow: 1px 1px 3px black;
+          box-shadow: 1px 1px 3px black;
+}
+
+.relative-card img {
+  width: 100px;
+  height: 100px;
+  margin: 5px;
+  -o-object-fit: cover;
+     object-fit: cover;
+  border-radius: 100%;
+  -webkit-box-shadow: 0px 0px 3px black;
+          box-shadow: 0px 0px 3px black;
+}
+
+.relative-card:hover {
+  -webkit-box-shadow: 0px 0px 0px;
+          box-shadow: 0px 0px 0px;
+  border: 1px solid black;
+}
+
+.relative-card:hover #right-arrow {
+  font-size: larger;
+  color: #3caf57;
+}
+
+.section-heading {
+  border-bottom: 1px solid grey;
+}
+
+.section-heading i {
+  min-width: 80px;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+  display: block !important;
+}
+
+.form-row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  width: 100%;
+}
+
+.form-row .form-row-header {
+  width: 100%;
+  text-align: left;
+  font-size: large;
+  margin: 10px 0 0 10px;
+}
+
+.form-row .form-field {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  margin: 10px;
+  min-width: 100px;
+}
+
+.form-row .form-error {
+  height: 1em;
+}
+
+.form-error {
+  font-size: small;
+  color: red;
+  height: 1em;
+}
+/*# sourceMappingURL=styles.css.map */

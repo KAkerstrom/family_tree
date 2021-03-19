@@ -1,19 +1,19 @@
 import React from 'react';
-import { Card } from 'react-bootstrap';
 import history from '../../utils/history';
 
-function RelativeCard({ relative }) {
+function RelativeCard({ relative, ...props }) {
   if (!relative) return null;
   return (
-    <Card
-      body
-      className='w-100'
+    <div
+      className='relative-card clickable'
       onClick={() =>
         history.push(`/trees/${relative.tree}/relatives/${relative._id}`)
       }
+      {...props}
     >
+      <img src={require('../../assets/test_img.jpg').default} alt='' />
       {`${relative.first_name} ${relative.last_name}`}
-    </Card>
+    </div>
   );
 }
 

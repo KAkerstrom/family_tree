@@ -32,10 +32,13 @@ router.post(
   auth,
   check('name', 'Name is required').not().isEmpty(),
   async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
     try {
       const newTree = new Tree({
         name: req.body.name,
-        users: [{ user: req.user.id, role: roles.delete }],
+        users: [{ user: req.user.id, role: roles.admin }],
       });
       const tree = await newTree.save();
       res.json({ data: tree });
