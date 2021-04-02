@@ -13,6 +13,7 @@ const newRelativeSchema = yup.object().shape({
   gender: yup.string().required('Gender is required.'),
   birthdate: yup.date().nullable(),
   deathdate: yup.date().nullable(),
+  relations: yup.array(),
 });
 
 const onSubmit = (values, { setSubmitting }) => {
@@ -129,27 +130,30 @@ const NewRelative = ({ match, user, relatives, getRelatives }) => {
               <FormField title='Death Date' id='deathdate' as='date' />
             </div>
             <div className='form-row'>
-              <h3 className='form-row-header'>Relationships</h3>
-              {relationshipDivs}
-              <div className='form-row'>
+              <h3 className='form-row-header'>
+                Relationships{' '}
                 <button
+                  className='btn btn-success'
                   onClick={() => {
                     setRelationshipDivs([
                       ...relationshipDivs,
                       <RelationshipDiv index={relationshipIndex} />,
                     ]);
                     setRelationshipIndex(relationshipIndex + 1);
+                    return false;
                   }}
                 >
-                  add relative
+                  add a relation
                 </button>
-              </div>
+              </h3>
+              {relationshipDivs}
+              <div className='form-row'></div>
             </div>
 
             <input
               type='submit'
               disabled={isSubmitting}
-              value='Add Relative'
+              value='Create Relative'
               className='btn btn-primary btn-block'
             />
           </Form>
