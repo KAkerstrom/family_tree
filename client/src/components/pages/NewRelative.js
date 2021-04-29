@@ -3,7 +3,7 @@ import { loadUser } from '../../redux/auth';
 import { connect } from 'react-redux';
 import { getTree } from '../../redux/relatives';
 import { getRelatives } from '../../redux/relatives';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
 import { DateField } from '../layout/forms/DateField';
 const yup = require('yup');
 
@@ -51,48 +51,6 @@ const NewRelative = ({ match, user, relatives, getRelatives }) => {
     //eslint-disable-next-line
   }, []);
 
-  const [relationshipIndex, setRelationshipIndex] = useState(0);
-  const [relationshipDivs, setRelationshipDivs] = useState([]);
-
-  const RelationshipDiv = ({ index }) => (
-    <div className='form-row'>
-      <FormField
-        title=''
-        id={`relative_${index}`}
-        as='select'
-        options={[
-          { value: null, text: 'n/a' },
-          ...Object.values(relatives).map((x) => {
-            return {
-              value: x._id,
-              text: `${x.first_name} ${x.last_name}`,
-            };
-          }),
-        ]}
-      />{' '}
-      <FormField
-        title=''
-        id={`relationshipType_${index}`}
-        as='select'
-        className='w-25'
-        options={[
-          {
-            value: 'parent',
-            text: 'Parent',
-          },
-          {
-            value: 'child',
-            text: 'Child',
-          },
-          {
-            value: 'spouse',
-            text: 'Spouse',
-          },
-        ]}
-      />
-    </div>
-  );
-
   return (
     <div className='w-100 h-100'>
       <Formik
@@ -102,11 +60,12 @@ const NewRelative = ({ match, user, relatives, getRelatives }) => {
           gender: 'male',
           birthdate: null,
           deathdate: null,
+          relations: [],
         }}
         validationSchema={newRelativeSchema}
         onSubmit={onSubmit}
       >
-        {({ isSubmitting }) => (
+        {({ values, isSubmitting }) => (
           <Form className='w-50 m-auto'>
             <div className='form-row'>
               <FormField title='First Name' id='first_name' />
@@ -130,24 +89,71 @@ const NewRelative = ({ match, user, relatives, getRelatives }) => {
               <FormField title='Death Date' id='deathdate' as='date' />
             </div>
             <div className='form-row'>
-              <h3 className='form-row-header'>
-                Relationships{' '}
-                <button
-                  className='btn btn-success'
-                  onClick={() => {
-                    setRelationshipDivs([
-                      ...relationshipDivs,
-                      <RelationshipDiv index={relationshipIndex} />,
-                    ]);
-                    setRelationshipIndex(relationshipIndex + 1);
-                    return false;
-                  }}
-                >
-                  add a relation
-                </button>
-              </h3>
-              {relationshipDivs}
-              <div className='form-row'></div>
+              <h3 className='form-row-header'>Relationships</h3>
+              <FieldArray
+                name='relations'
+                render={(arrayHelpers) => (
+                  <div>
+                    {values.relations.map((relation, index) => (
+                      <div className='form-row' key={index}>
+                        <FormField
+                          title=''
+                          name={`relations[${index}].relativeId`}
+                          /*id={`relative_${index}`}*/
+                          as='select'
+                          options={[
+                            { value: null, text: 'n/a' },
+                            ...Object.values(relatives).map((x) => {
+                              return {
+                                value: x._id,
+                                text: `${x.first_name} ${x.last_name}`,
+                              };
+                            }),
+                          ]}
+                        />{' '}
+                        {/* <FormField
+                          title=''
+                          name='relation.relationshipType'
+                          as='select'
+                          className='w-25'
+                          options={[
+                            {
+                              value: 'parent',
+                              text: 'Parent',
+                            },
+                            {
+                              value: 'child',
+                              text: 'Child',
+                            },
+                            {
+                              value: 'spouse',
+                              text: 'Spouse',
+                            },
+                          ]}
+                        /> */}
+                        <button
+                          type='button'
+                          onClick={() => arrayHelpers.remove(index)}
+                        >
+                          -
+                        </button>
+                      </div>
+                    ))}
+
+                    <button
+                      type='button'
+                      onClick={() =>
+                        arrayHelpers.push({
+                          relativeId: '',
+                          relationshipType: '',
+                        })
+                      }
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
+              />
             </div>
 
             <input
